@@ -162,8 +162,9 @@ public class RuleChain implements FilterChain {
         if ( response instanceof UrlRewriteWrappedResponse && request instanceof HttpServletRequest) {
             HashMap overiddenRequestParameters = ((UrlRewriteWrappedResponse) response).getOverridenRequestParameters();
             String overiddenMethod = ((UrlRewriteWrappedResponse) response).getOverridenMethod();
-            if ( overiddenRequestParameters != null || overiddenMethod != null) {
-                request = new UrlRewriteWrappedRequest((HttpServletRequest) request, overiddenRequestParameters, overiddenMethod);
+            HashMap overiddenRequestHeaders = ((UrlRewriteWrappedResponse) response).getOverridenRequestHeaders();
+            if ( overiddenRequestParameters != null || overiddenMethod != null || overiddenRequestHeaders != null) {
+                request = new UrlRewriteWrappedRequest((HttpServletRequest) request, overiddenRequestParameters, overiddenMethod, overiddenRequestHeaders);
             }
         }
         if (finalRewrittenRequest != null) {

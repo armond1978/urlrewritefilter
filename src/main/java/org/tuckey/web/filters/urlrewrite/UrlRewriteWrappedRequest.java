@@ -36,11 +36,7 @@ package org.tuckey.web.filters.urlrewrite;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handles wrapping the request if necessary.
@@ -52,16 +48,18 @@ public class UrlRewriteWrappedRequest extends HttpServletRequestWrapper {
 
     HashMap overridenParameters;
     String overridenMethod;
+    HashMap overridenHeaders;
 
     public UrlRewriteWrappedRequest(HttpServletRequest httpServletRequest) {
         super(httpServletRequest);
     }
 
     public UrlRewriteWrappedRequest(HttpServletRequest httpServletRequest,
-                                    HashMap overridenParameters, String overridenMethod) {
+                                    HashMap overridenParameters, String overridenMethod, HashMap overridenHeaders) {
         super(httpServletRequest);
         this.overridenParameters = overridenParameters;
         this.overridenMethod = overridenMethod;
+        this.overridenHeaders = overridenHeaders;
     }
 
     public Enumeration getParameterNames() {
@@ -107,5 +105,39 @@ public class UrlRewriteWrappedRequest extends HttpServletRequestWrapper {
     public String getMethod() {
         if (overridenMethod != null) return overridenMethod;
         return super.getMethod();
+    }
+
+    public Enumeration getHeaderNames() {
+        if (overridenHeaders != null) {
+            List keys = Collections.list(super.getHeaderNames());
+            keys.addAll(overridenHeaders.keySet());
+            return Collections.enumeration(keys);
+        }
+        return super.getHeaderNames();
+    }
+
+    public String getHeader(String name) {
+        if (overridenHeaders != null && overridenHeaders.containsKey(name)) {
+            String[] values = (String[]) overridenHeaders.get(name);
+            if (values == null || values.length == 0) {
+                return null;
+            } else {
+                return values[0];
+            }
+        }
+        return super.getHeader(name);
+    }
+
+    public Enumeration getHeaders(String name) {
+        if (overridenHeaders != null && overridenHeaders.containsKey(name)) {
+            String[] values = (String[]) overridenHeaders.get(name);
+
+            if( values==null ) {
+                return null;
+            } else {
+                return Collections.enumeration(Arrays.asList(values));
+            }
+        }
+        return super.getHeaders(name);
     }
 }

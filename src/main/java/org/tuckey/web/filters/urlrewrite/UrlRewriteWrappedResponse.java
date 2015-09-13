@@ -54,6 +54,8 @@ public class UrlRewriteWrappedResponse extends HttpServletResponseWrapper {
     //is a <string, string[]> map
     HashMap overridenRequestParameters;
     String overridenMethod;
+    //is a <string, string[]> map
+    HashMap overridenRequestHeaders;
 
     public UrlRewriteWrappedResponse(HttpServletResponse httpServletResponse, HttpServletRequest httpServletRequest,
                                      UrlRewriter urlRerwiter) {
@@ -146,6 +148,23 @@ public class UrlRewriteWrappedResponse extends HttpServletResponseWrapper {
 
     public HashMap getOverridenRequestParameters() {
         return overridenRequestParameters;
+    }
+
+    public void addOverridenRequestHeader(String k, String v) {
+        if (overridenRequestHeaders == null) overridenRequestHeaders = new HashMap();
+        if (overridenRequestHeaders.get(k) == null) {
+            overridenRequestHeaders.put(k, new String[]{v});
+        } else {
+            String[] currentValues = (String[]) overridenRequestHeaders.get(k);
+            String[] finalValues = new String[currentValues.length + 1];
+            System.arraycopy(currentValues, 0, finalValues, 0, currentValues.length);
+            finalValues[finalValues.length - 1] = v;
+            overridenRequestHeaders.put(k, finalValues);
+        }
+    }
+
+    public HashMap getOverridenRequestHeaders() {
+        return overridenRequestHeaders;
     }
 
     public String getOverridenMethod() {

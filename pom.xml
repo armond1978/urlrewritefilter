@@ -4,7 +4,7 @@
     <groupId>org.tuckey</groupId>
     <artifactId>urlrewritefilter</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.0.5-armond</version>
     <name>UrlRewriteFilter</name>
     <url>http://www.tuckey.org/urlrewrite/</url>
     <inceptionYear>2001</inceptionYear>
@@ -46,11 +46,13 @@
         </license>
     </licenses>
 
+<!--
     <scm>
         <url>https://github.com/paultuckey/urlrewritefilter</url>
         <connection>scm:git:git://github.com/paultuckey/urlrewritefilter.git</connection>
         <developerConnection>scm:git:git@github.com:paultuckey/urlrewritefilter.git</developerConnection>
     </scm>
+-->
 
     <developers>
         <developer>

@@ -164,7 +164,7 @@ public class SetAttributeTest extends TestCase {
         UrlRewriteWrappedResponse wrappedResponse = new UrlRewriteWrappedResponse(new MockResponse(), request, null);
         set.execute(null, toMatcher, request, wrappedResponse);
 
-        UrlRewriteWrappedRequest wrappedRequest = new UrlRewriteWrappedRequest(request, wrappedResponse.getOverridenRequestParameters(), null);
+        UrlRewriteWrappedRequest wrappedRequest = new UrlRewriteWrappedRequest(request, wrappedResponse.getOverridenRequestParameters(), null, null);
         assertEquals(null, wrappedRequest.getParameter("version_id"));
     }
 
@@ -212,7 +212,7 @@ public class SetAttributeTest extends TestCase {
         set.initialise();
         set.execute(null, toMatcher, request, response);
 
-        UrlRewriteWrappedRequest wrappedRequest = new UrlRewriteWrappedRequest(request, response.getOverridenRequestParameters(), null);
+        UrlRewriteWrappedRequest wrappedRequest = new UrlRewriteWrappedRequest(request, response.getOverridenRequestParameters(), null, null);
         assertEquals("Capture group 1 is /query", wrappedRequest.getParameter("blah"));
         assertEquals("Capture group 1 is /query", wrappedRequest.getParameterValues("blah")[0]);
 

@@ -87,6 +87,7 @@ public class SetAttribute {
     private static final short SET_TYPE_PARAM = 8;
     private static final short SET_TYPE_EXPIRES = 9;
     private static final short SET_TYPE_METHOD = 10;
+    private static final short SET_TYPE_REQUEST_HEADER = 11;
 
     private long expiresValueAdd = 0;
     private boolean valueContainsVariable = false;
@@ -104,6 +105,7 @@ public class SetAttribute {
         if (type == SET_TYPE_PARAM) return "parameter";
         if (type == SET_TYPE_EXPIRES) return "expires";
         if (type == SET_TYPE_METHOD) return "method";
+        if (type == SET_TYPE_REQUEST_HEADER) return "request-header";
         return "request";
     }
 
@@ -130,6 +132,8 @@ public class SetAttribute {
             type = SET_TYPE_REQUEST;
         } else if ("method".equals(typeStr)) {
             type = SET_TYPE_METHOD;
+        } else if ("request-header".equals(typeStr)) {
+            type = SET_TYPE_REQUEST_HEADER;
         } else {
             setError("type (" + typeStr + ") is not valid");
         }
@@ -194,7 +198,7 @@ public class SetAttribute {
             if ( hsResponse instanceof UrlRewriteWrappedResponse ) {
                 ((UrlRewriteWrappedResponse) hsResponse).setOverridenMethod(value);
             }   else {
-                log.warn("unable to set request method as request not a UrlRewriteWrappedResponse");
+                log.warn("unable to set request method as response not a UrlRewriteWrappedResponse");
             }
 
         } else if (type == SET_TYPE_PARAM) {
@@ -202,7 +206,7 @@ public class SetAttribute {
             if ( hsResponse instanceof UrlRewriteWrappedResponse ) {
                 ((UrlRewriteWrappedResponse) hsResponse).addOverridenRequestParameter(name, value);
             }   else {
-                log.warn("unable to set request parameter as request not a UrlRewriteWrappedResponse");
+                log.warn("unable to set request parameter as response not a UrlRewriteWrappedResponse");
             }
 
         } else if (type == SET_TYPE_SESSION) {
@@ -244,6 +248,14 @@ public class SetAttribute {
         } else if (type == SET_TYPE_EXPIRES) {
             log.debug("setting expires");
             hsResponse.setDateHeader("Expires", System.currentTimeMillis() + expiresValueAdd);
+
+        } else if (type == SET_TYPE_REQUEST_HEADER) {
+            log.debug("setting request header");
+            if ( hsResponse instanceof UrlRewriteWrappedResponse ) {
+                ((UrlRewriteWrappedResponse) hsResponse).addOverridenRequestHeader(name, value);
+            }   else {
+                log.warn("unable to set request header as response not a UrlRewriteWrappedResponse");
+            }
 
         } else {
             log.warn("unknown type" + type);
