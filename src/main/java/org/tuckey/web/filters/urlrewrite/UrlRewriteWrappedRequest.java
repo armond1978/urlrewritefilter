@@ -46,16 +46,16 @@ import java.util.*;
  */
 public class UrlRewriteWrappedRequest extends HttpServletRequestWrapper {
 
-    HashMap overridenParameters;
-    String overridenMethod;
-    HashMap overridenHeaders;
+    private Map<String, String[]> overridenParameters;
+    private String overridenMethod;
+    private Map<String, String[]> overridenHeaders;
 
     public UrlRewriteWrappedRequest(HttpServletRequest httpServletRequest) {
         super(httpServletRequest);
     }
 
     public UrlRewriteWrappedRequest(HttpServletRequest httpServletRequest,
-                                    HashMap overridenParameters, String overridenMethod, HashMap overridenHeaders) {
+                                    Map<String, String[]> overridenParameters, String overridenMethod, Map<String, String[]> overridenHeaders) {
         super(httpServletRequest);
         this.overridenParameters = overridenParameters;
         this.overridenMethod = overridenMethod;
@@ -109,33 +109,55 @@ public class UrlRewriteWrappedRequest extends HttpServletRequestWrapper {
 
     public Enumeration getHeaderNames() {
         if (overridenHeaders != null) {
-            List keys = Collections.list(super.getHeaderNames());
+            final Enumeration superHeaderNames = super.getHeaderNames();
+            final List<String> keys = new LinkedList<String>();
+
             keys.addAll(overridenHeaders.keySet());
+            while( superHeaderNames.hasMoreElements() ) {
+                final String superHeaderName = superHeaderNames.nextElement().toString();
+                boolean found = false;
+
+                for( Map.Entry<String, String[]> overridenHeader: overridenHeaders.entrySet() ) {
+                    if (overridenHeader.getKey().equalsIgnoreCase(superHeaderName)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if( !found ) {
+                    keys.add(superHeaderName);
+                }
+            }
             return Collections.enumeration(keys);
         }
         return super.getHeaderNames();
     }
 
     public String getHeader(String name) {
-        if (overridenHeaders != null && overridenHeaders.containsKey(name)) {
-            String[] values = (String[]) overridenHeaders.get(name);
-            if (values == null || values.length == 0) {
-                return null;
-            } else {
-                return values[0];
+        if( overridenHeaders!=null ) {
+            for( Map.Entry<String, String[]> header: overridenHeaders.entrySet() ) {
+                if (header.getKey().equalsIgnoreCase(name)) {
+                    if (header.getValue() == null || header.getValue().length == 0) {
+                        return null;
+                    } else {
+                        return header.getValue()[0];
+                    }
+                }
             }
         }
         return super.getHeader(name);
     }
 
     public Enumeration getHeaders(String name) {
-        if (overridenHeaders != null && overridenHeaders.containsKey(name)) {
-            String[] values = (String[]) overridenHeaders.get(name);
-
-            if( values==null ) {
-                return null;
-            } else {
-                return Collections.enumeration(Arrays.asList(values));
+        if( overridenHeaders!=null ) {
+            for( Map.Entry<String, String[]> header: overridenHeaders.entrySet() ) {
+                if (header.getKey().equalsIgnoreCase(name)) {
+                    if (header.getValue() == null || header.getValue().length == 0) {
+                        return null;
+                    } else {
+                        return Collections.enumeration(Arrays.asList(header.getValue()));
+                    }
+                }
             }
         }
         return super.getHeaders(name);

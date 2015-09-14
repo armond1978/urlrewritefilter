@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles wrapping the response so we can encode the url's on the way "out" (ie, in JSP or servlet generation).
@@ -51,11 +53,9 @@ public class UrlRewriteWrappedResponse extends HttpServletResponseWrapper {
     private HttpServletResponse httpServletResponse;
     private HttpServletRequest httpServletRequest;
 
-    //is a <string, string[]> map
-    HashMap overridenRequestParameters;
-    String overridenMethod;
-    //is a <string, string[]> map
-    HashMap overridenRequestHeaders;
+    private Map<String, String[]> overridenRequestParameters;
+    private String overridenMethod;
+    private Map<String, String[]> overridenRequestHeaders;
 
     public UrlRewriteWrappedResponse(HttpServletResponse httpServletResponse, HttpServletRequest httpServletRequest,
                                      UrlRewriter urlRerwiter) {
@@ -134,11 +134,14 @@ public class UrlRewriteWrappedResponse extends HttpServletResponseWrapper {
     }
 
     public void addOverridenRequestParameter(String k, String v) {
-        if (overridenRequestParameters == null) overridenRequestParameters = new HashMap();
+        if (overridenRequestParameters == null) {
+            overridenRequestParameters = new HashMap<String, String[]>();
+        }
+
         if (overridenRequestParameters.get(k) == null) {
             overridenRequestParameters.put(k, new String[]{v});
         } else {
-            String[] currentValues = (String[]) overridenRequestParameters.get(k);
+            String[] currentValues = overridenRequestParameters.get(k);
             String[] finalValues = new String[currentValues.length + 1];
             System.arraycopy(currentValues, 0, finalValues, 0, currentValues.length);
             finalValues[finalValues.length - 1] = v;
@@ -146,24 +149,37 @@ public class UrlRewriteWrappedResponse extends HttpServletResponseWrapper {
         }
     }
 
-    public HashMap getOverridenRequestParameters() {
+    public Map<String, String[]> getOverridenRequestParameters() {
         return overridenRequestParameters;
     }
 
     public void addOverridenRequestHeader(String k, String v) {
-        if (overridenRequestHeaders == null) overridenRequestHeaders = new HashMap();
-        if (overridenRequestHeaders.get(k) == null) {
+        if (overridenRequestHeaders == null) {
+            overridenRequestHeaders = new HashMap<String, String[]>();
+        }
+
+        boolean found = false;
+
+        for( Map.Entry<String, String[]> requestHeader: overridenRequestHeaders.entrySet() ) {
+            if( requestHeader.getKey().equalsIgnoreCase(k) ) {
+                found = true;
+
+                String[] currentValues = requestHeader.getValue();
+                String[] finalValues = new String[currentValues.length + 1];
+                System.arraycopy(currentValues, 0, finalValues, 0, currentValues.length);
+                finalValues[finalValues.length - 1] = v;
+                overridenRequestHeaders.put(requestHeader.getKey(), finalValues);
+
+                break;
+            }
+        }
+
+        if( !found ) {
             overridenRequestHeaders.put(k, new String[]{v});
-        } else {
-            String[] currentValues = (String[]) overridenRequestHeaders.get(k);
-            String[] finalValues = new String[currentValues.length + 1];
-            System.arraycopy(currentValues, 0, finalValues, 0, currentValues.length);
-            finalValues[finalValues.length - 1] = v;
-            overridenRequestHeaders.put(k, finalValues);
         }
     }
 
-    public HashMap getOverridenRequestHeaders() {
+    public Map<String, String[]> getOverridenRequestHeaders() {
         return overridenRequestHeaders;
     }
 
